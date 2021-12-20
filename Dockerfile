@@ -1,26 +1,6 @@
-FROM node:slim as build
-
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-
-WORKDIR /app
-COPY . /app/
-RUN yarn install \
-  && yarn run build \
-  && rm -rf node_modules \
-  && yarn install --production \
-  && mv node_modules dist/
-
-
 FROM node:alpine
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-  PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-ENV NODE_ENV production
-
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-
+WORKDIR /app
 RUN apk add --no-cache \
   chromium \
   nss \
@@ -29,10 +9,28 @@ RUN apk add --no-cache \
   ca-certificates \
   ttf-freefont 
 
-USER nextjs
+# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+  PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-WORKDIR /app
-VOLUME /app/storage
-COPY --from=build /app/dist/ /app/
+COPY . /app/
 
-CMD ["node", "index.js"]
+RUN npm i
+RUN npm run build 
+RUN rm -rf node_modules 
+RUN npm i --production 
+
+# Add user so we don't need --no-sandbox.
+RUN addgroup -S pptruser && adduser -S -g pptruser pptruser \
+  && mkdir -p /home/pptruser/Downloads /app \
+  && chown -R pptruser:pptruser /home/pptruser \
+  && chown -R pptruser:pptruser /app
+
+# Run everything after as non-privileged user.
+USER pptruser
+
+ENV TZ=Europe/Berlin
+
+EXPOSE 8082
+
+CMD ["npm", "run", "prod"]

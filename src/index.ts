@@ -1,6 +1,4 @@
-import 'core-js';
-import 'regenerator-runtime';
-import puppeteer from 'puppeteer';
+import puppeteer, { Browser } from 'puppeteer';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -23,24 +21,23 @@ process.on('SIGINT', function () {
     process.exit();
 });
 
-let browser = puppeteer.launch({
-    headless: true,
-    args: ['--disable-dev-shm-usage'],
-});
-
-async function renderPDF(html) {
-    if (!browser.isConnected()) {
-        browser = await puppeteer.launch({
-            headless: true,
-            args: ['--disable-dev-shm-usage'],
-        });
-    }
+async function renderPDF(html: string) {
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--disable-dev-shm-usage',
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+        ],
+    });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+
     const pdf = await page.pdf({
         printBackground: true,
-        format: 'A4',
+        format: 'a4',
         preferCSSPageSize: true,
         margin: {
             top: 0,
@@ -50,7 +47,7 @@ async function renderPDF(html) {
         },
     });
 
-    await page.close();
+    await browser.close();
 
     return pdf;
 }
