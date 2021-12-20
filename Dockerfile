@@ -11,9 +11,10 @@ RUN yarn install \
   && mv node_modules dist/
 
 
-FROM node:slim
+FROM node:alpine
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+  PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 RUN apk add --no-cache \
   chromium \
