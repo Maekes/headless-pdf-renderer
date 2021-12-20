@@ -23,7 +23,7 @@ process.on('SIGINT', function () {
     process.exit();
 });
 
-let browser = await puppeteer.launch({
+let browser = puppeteer.launch({
     headless: true,
     args: ['--disable-dev-shm-usage'],
 });
