@@ -25,7 +25,6 @@ process.on('SIGINT', function () {
 
 let browser = await puppeteer.launch({
     headless: true,
-    executablePath: 'google-chrome-stable',
     args: ['--disable-dev-shm-usage'],
 });
 
@@ -33,7 +32,6 @@ async function renderPDF(html) {
     if (!browser.isConnected()) {
         browser = await puppeteer.launch({
             headless: true,
-            executablePath: 'google-chrome-stable',
             args: ['--disable-dev-shm-usage'],
         });
     }
