@@ -18,6 +18,8 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 ENV NODE_ENV production
 
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
 
 RUN apk add --no-cache \
   chromium \
