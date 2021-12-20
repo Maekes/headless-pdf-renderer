@@ -29,6 +29,8 @@ RUN apk add --no-cache \
   ca-certificates \
   ttf-freefont 
 
+USER nextjs
+
 WORKDIR /app
 VOLUME /app/storage
 COPY --from=build /app/dist/ /app/
